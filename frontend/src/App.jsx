@@ -51,12 +51,8 @@ export default function App() {
     await loadAllData();
   };
 
-  const handleApiRegistered = (newApi) => {
-    setApis(prev => [...prev, newApi]);
-    setHealthScores(prev => [
-      ...prev,
-      { apiId: newApi.id, apiName: newApi.name, overallScore: 100.0, availabilityScore: 100.0, latencyScore: 100.0, errorScore: 100.0, dependencyScore: 100.0, trafficScore: 100.0, statusBadge: 'HEALTHY_GREEN' }
-    ]);
+  const handleApiRegistered = async (newApi) => {
+    await loadAllData();
   };
 
   const activeIncidents = incidents.filter(i => i.status !== 'RESOLVED');
@@ -116,6 +112,7 @@ export default function App() {
         isOpen={isIncidentsOpen}
         onClose={() => setIsIncidentsOpen(false)}
         incidents={incidents}
+        onRefresh={loadAllData}
       />
 
       <RegisterApiModal 

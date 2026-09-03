@@ -1,8 +1,14 @@
 import React from 'react';
-import { X, ShieldAlert, CheckCircle, AlertTriangle } from 'lucide-react';
+import { X, ShieldAlert, CheckCircle, AlertTriangle, Check } from 'lucide-react';
+import { updateIncidentStatus } from '../services/apiService';
 
-export default function IncidentManagerModal({ isOpen, onClose, incidents }) {
+export default function IncidentManagerModal({ isOpen, onClose, incidents, onRefresh }) {
   if (!isOpen) return null;
+
+  const handleStatusUpdate = async (id, status) => {
+    await updateIncidentStatus(id, status);
+    if (onRefresh) onRefresh();
+  };
 
   return (
     <div style={{
@@ -62,9 +68,29 @@ export default function IncidentManagerModal({ isOpen, onClose, incidents }) {
                 <strong>Probable Root Cause:</strong> <span style={{ color: '#fbbf24' }}>{inc.probableRootCause}</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-                <span>Status: <strong style={{ color: '#38bdf8' }}>{inc.status}</strong></span>
-                <span>Detected: {new Date(inc.createdAt).toLocaleTimeString()}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.78rem' }}>
+                <div>Status: <strong style={{ color: inc.status === 'RESOLVED' ? '#34d399' : '#38bdf8' }}>{inc.status}</strong></div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {inc.status !== 'INVESTIGATING' && (
+                    <button 
+                      className="btn-secondary" 
+                      onClick={() => handleStatusUpdate(inc.id, 'INVESTIGATING')}
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      Investigate
+                    </button>
+                  )}
+                  {inc.status !== 'RESOLVED' && (
+                    <button 
+                      className="btn-primary" 
+                      onClick={() => handleStatusUpdate(inc.id, 'RESOLVED')}
+                      style={{ fontSize: '0.72rem', padding: '4px 10px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                    >
+                      <Check size={14} /> Resolve Incident
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

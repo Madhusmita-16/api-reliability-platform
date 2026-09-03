@@ -77,6 +77,16 @@ export async function fetchIncidents() {
   }
 }
 
+export async function updateIncidentStatus(id, status) {
+  try {
+    const res = await fetch(`${API_BASE}/incidents/${id}/status?status=${status}`, { method: 'PUT' });
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    return { id, status };
+  }
+}
+
 export async function fetchForecast(apiId) {
   try {
     const res = await fetch(`${API_BASE}/prediction/forecast/${apiId}`);
