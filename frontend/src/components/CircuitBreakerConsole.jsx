@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, RefreshCw, Zap, AlertTriangle, CheckCircle } from 'lucide-react';
-import { triggerAutoRecovery } from '../services/apiService';
+import { triggerAutoRecovery, updateCircuitState } from '../services/apiService';
 
 export default function CircuitBreakerConsole({ apis, onRefresh }) {
   const [selectedApiId, setSelectedApiId] = useState(4); // Inventory Service default
@@ -8,6 +8,14 @@ export default function CircuitBreakerConsole({ apis, onRefresh }) {
   const [loading, setLoading] = useState(false);
 
   const selectedApi = apis.find(a => a.id === selectedApiId) || apis[0] || {};
+
+  const handleStateChange = async (newState) => {
+    setLoading(true);
+    const updated = await updateCircuitState(selectedApiId, newState);
+    setRecoveryLog({ message: `Circuit state for ${selectedApi.name || 'API'} manually updated to ${newState}` });
+    setLoading(false);
+    if (onRefresh) onRefresh();
+  };
 
   const handleTriggerRecovery = async () => {
     setLoading(true);
@@ -112,12 +120,39 @@ export default function CircuitBreakerConsole({ apis, onRefresh }) {
       {/* Self-Healing Trigger Button */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          Active Circuit State for <strong>{selectedApi.name}</strong>: <span style={{ color: selectedApi.circuitState === 'OPEN' ? '#f87171' : '#34d399', fontWeight: 700 }}>{selectedApi.circuitState || 'CLOSED'}</span>
+          Active Circuit State for <strong>{selectedApi.name}</strong>: <span style={{ color: selectedApi.circuitState === 'OPEN' ? '#f87171' : selectedApi.circuitState === 'HALF_OPEN' ? '#fbbf24' : '#34d399', fontWeight: 700 }}>{selectedApi.circuitState || 'CLOSED'}</span>
         </div>
 
-        <button className="btn-primary" onClick={handleTriggerRecovery} disabled={loading}>
-          <Zap size={16} /> {loading ? 'Healing Service...' : 'Trigger Automated Self-Healing'}
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button 
+            className="btn-secondary" 
+            onClick={() => handleStateChange('CLOSED')} 
+            disabled={loading}
+            style={{ fontSize: '0.75rem', padding: '6px 12px', borderColor: 'rgba(52, 211, 153, 0.4)' }}
+          >
+            Set CLOSED 🟢
+          </button>
+          <button 
+            className="btn-secondary" 
+            onClick={() => handleStateChange('OPEN')} 
+            disabled={loading}
+            style={{ fontSize: '0.75rem', padding: '6px 12px', borderColor: 'rgba(248, 113, 113, 0.4)' }}
+          >
+            Set OPEN 🔴
+          </button>
+          <button 
+            className="btn-secondary" 
+            onClick={() => handleStateChange('HALF_OPEN')} 
+            disabled={loading}
+            style={{ fontSize: '0.75rem', padding: '6px 12px', borderColor: 'rgba(251, 191, 36, 0.4)' }}
+          >
+            Set HALF_OPEN 🟡
+          </button>
+
+          <button className="btn-primary" onClick={handleTriggerRecovery} disabled={loading} style={{ fontSize: '0.8rem' }}>
+            <Zap size={16} /> {loading ? 'Processing...' : 'Auto Self-Healing'}
+          </button>
+        </div>
       </div>
 
       {/* Recovery Log Output */}

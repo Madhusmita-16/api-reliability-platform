@@ -128,8 +128,15 @@ export default function HealthScoreTable({ healthScores, apis, onSelectApi, sele
 
                   {/* Action */}
                   <td style={{ padding: '14px 16px' }}>
-                    <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                      Analyze <ChevronRight size={14} />
+                    <button 
+                      className={isSelected ? "btn-primary" : "btn-secondary"} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectApi(item.apiId);
+                      }}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                    >
+                      {isSelected ? 'Analyzing Target' : 'Analyze'} <ChevronRight size={14} />
                     </button>
                   </td>
                 </tr>

@@ -4,12 +4,16 @@ import { fetchContractCheck } from '../services/apiService';
 
 export default function ContractDriftViewer({ selectedApiId }) {
   const [contract, setContract] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadContract = async () => {
+    setLoading(true);
+    const data = await fetchContractCheck(selectedApiId || 1);
+    setContract(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    async function loadContract() {
-      const data = await fetchContractCheck(selectedApiId || 1); // Payment Service default
-      setContract(data);
-    }
     loadContract();
   }, [selectedApiId]);
 
@@ -27,9 +31,14 @@ export default function ContractDriftViewer({ selectedApiId }) {
           </p>
         </div>
 
-        <span className={contract.isCompatible ? 'badge-green' : 'badge-red'}>
-          {contract.isCompatible ? '✅ Schema Fully Compatible' : '⚠️ BREAKING SCHEMA DRIFT'}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button className="btn-secondary" onClick={loadContract} disabled={loading} style={{ fontSize: '0.78rem' }}>
+            <RefreshCw size={14} /> {loading ? 'Evaluating...' : 'Re-check Schema Contract'}
+          </button>
+          <span className={contract.isCompatible ? 'badge-green' : 'badge-red'}>
+            {contract.isCompatible ? '✅ Schema Fully Compatible' : '⚠️ BREAKING SCHEMA DRIFT'}
+          </span>
+        </div>
       </div>
 
       {/* Side-by-Side Schema Comparison */}

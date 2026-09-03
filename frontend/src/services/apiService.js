@@ -118,6 +118,16 @@ export async function fetchRootCause(apiId) {
   }
 }
 
+export async function updateCircuitState(apiId, state) {
+  try {
+    const res = await fetch(`${API_BASE}/resilience/circuit-breaker/${apiId}?state=${state}`, { method: 'POST' });
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    return { id: apiId, circuitState: state };
+  }
+}
+
 export async function triggerAutoRecovery(apiId) {
   try {
     const res = await fetch(`${API_BASE}/resilience/auto-recover/${apiId}`, { method: 'POST' });

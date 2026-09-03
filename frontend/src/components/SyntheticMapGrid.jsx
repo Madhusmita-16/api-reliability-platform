@@ -4,12 +4,16 @@ import { fetchSyntheticCheck } from '../services/apiService';
 
 export default function SyntheticMapGrid({ selectedApiId }) {
   const [syntheticData, setSyntheticData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadSynthetic = async () => {
+    setLoading(true);
+    const data = await fetchSyntheticCheck(selectedApiId || 1);
+    setSyntheticData(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    async function loadSynthetic() {
-      const data = await fetchSyntheticCheck(selectedApiId || 1);
-      setSyntheticData(data);
-    }
     loadSynthetic();
   }, [selectedApiId]);
 
@@ -29,9 +33,14 @@ export default function SyntheticMapGrid({ selectedApiId }) {
           </p>
         </div>
 
-        <span className="badge-cyan">
-          <Radio size={14} /> Edge Simulation Active
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button className="btn-secondary" onClick={loadSynthetic} disabled={loading} style={{ fontSize: '0.78rem' }}>
+            <Radio size={14} color="#00f2fe" /> {loading ? 'Probing...' : 'Re-run Synthetic Edge Probes'}
+          </button>
+          <span className="badge-cyan">
+            Edge Simulation Active
+          </span>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>

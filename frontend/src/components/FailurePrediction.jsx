@@ -4,12 +4,16 @@ import { fetchForecast } from '../services/apiService';
 
 export default function FailurePrediction({ selectedApiId }) {
   const [forecast, setForecast] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadForecast = async () => {
+    setLoading(true);
+    const data = await fetchForecast(selectedApiId || 4);
+    setForecast(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    async function loadForecast() {
-      const data = await fetchForecast(selectedApiId || 4);
-      setForecast(data);
-    }
     loadForecast();
   }, [selectedApiId]);
 
@@ -29,9 +33,14 @@ export default function FailurePrediction({ selectedApiId }) {
           </p>
         </div>
 
-        <span className={isHighRisk ? 'badge-red' : 'badge-green'}>
-          Risk Level: {forecast.riskLevel}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button className="btn-secondary" onClick={loadForecast} disabled={loading} style={{ fontSize: '0.78rem' }}>
+            <TrendingDown size={14} color={isHighRisk ? '#f87171' : '#34d399'} /> {loading ? 'Forecasting...' : 'Re-evaluate Forecast'}
+          </button>
+          <span className={isHighRisk ? 'badge-red' : 'badge-green'}>
+            Risk Level: {forecast.riskLevel}
+          </span>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
